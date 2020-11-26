@@ -4,13 +4,18 @@ import java.util.Scanner;
 
 public class Cinema {
 
-    SystemState systemState;
+    private SystemState systemState;
     private final int rows;
     private final int seats;
     private final char[][] hallMap;
-    boolean powerOn = true;
-    int rowSold;
-    int seatSold;
+    private boolean powerOn = true;
+    private boolean smallCinema = false;
+    private int totalIncome;
+    private int rowSold;
+    private int seatSold;
+    private int currentIncome = 0;
+    private double hallOccupancy = 0.00;
+    private int soldTickets = 0;
 
     public Cinema() {
         Scanner scanner = new Scanner(System.in);
@@ -18,6 +23,14 @@ public class Cinema {
         rows = scanner.nextInt();
         System.out.println("Enter the number of seats in each row:");
         seats = scanner.nextInt();
+        totalIncome = 0;
+
+        if (rows * seats <= 60) {
+            totalIncome = rows * seats * 10;
+            smallCinema = true;
+        } else {
+            totalIncome = ((rows / 2) * 10 * seats) + ((rows - (rows / 2)) * 8 * seats);
+        }
 
         hallMap = new char[rows + 1][seats + 1];
         hallMap[0][0] = ' ';
@@ -40,12 +53,12 @@ public class Cinema {
         cinema.printMenu();
 
         while (cinema.powerOn) {
-            cinema.parceInput(scanner.nextInt());
+            cinema.parseInput(scanner.nextInt());
         }
 
     }
 
-    void parceInput(int input) {
+    private void parseInput(int input) {
         switch (systemState) {
             case MENU:
                 mainMenu(input);
@@ -64,15 +77,7 @@ public class Cinema {
         }
     }
 
-    void printMenu() {
-        System.out.println();
-        System.out.println("1. Show the seats");
-        System.out.println("2. Buy a ticket");
-        System.out.println("0. Exit");
-    }
-
-
-    void mainMenu(int input) {
+    private void mainMenu(int input) {
         switch (input) {
             case 1:
                 printHallMap();
@@ -81,6 +86,10 @@ public class Cinema {
             case 2:
                 systemState = SystemState.BUY;
                 buyTicket(input);
+                break;
+            case 3:
+                printStatistic();
+                printMenu();
                 break;
             case 0:
                 exit();
@@ -91,11 +100,19 @@ public class Cinema {
 
     }
 
-    public void printHallMap() {
+    private void printMenu() {
+        System.out.println();
+        System.out.println("1. Show the seats");
+        System.out.println("2. Buy a ticket");
+        System.out.println("3. Statistics");
+        System.out.println("0. Exit");
+    }
+
+    private void printHallMap() {
         System.out.println();
         System.out.println("Cinema:");
-        for (char[] vector : hallMap) {
-            for (char element : vector) {
+        for (char[] row : hallMap) {
+            for (char element : row) {
                 System.out.print(" " + element);
             }
             System.out.println();
@@ -103,7 +120,16 @@ public class Cinema {
         System.out.println();
     }
 
-    public void buyTicket(int input) {
+    private void printStatistic() {
+        System.out.println();
+        System.out.println("Number of purchased tickets: " + soldTickets);
+        System.out.printf("Percentage: %.2f", hallOccupancy);
+        System.out.println("%");
+        System.out.println("Current income: $" + currentIncome);
+        System.out.println("Total income: $" + totalIncome);
+    }
+
+    private void buyTicket(int input) {
         switch (systemState) {
             case BUY:
                 systemState = SystemState.ROW_SELECTION;
@@ -117,32 +143,55 @@ public class Cinema {
             case SEAT_SELECTION:
                 seatSold = input;
                 seatBooking(rowSold, seatSold);
-                ticketPricePrint(rowSold);
-                systemState = SystemState.MENU;
-                printMenu();
                 break;
             default:
                 break;
         }
     }
 
-    void seatBooking (int rowSold, int seatSold) {
-        hallMap[rowSold][seatSold] = 'B';
+    private void seatBooking (int rowSold, int seatSold) {
+        if (rowSold > rows || seatSold > seats) {
+            System.out.println("\nWrong input!");
+            systemState = SystemState.BUY;
+            buyTicket(2);
+        } else if (hallMap[rowSold][seatSold] == 'B') {
+            System.out.println("\nThat ticket has already been purchased");
+            systemState = SystemState.BUY;
+            buyTicket(2);
+        } else {
+            hallMap[rowSold][seatSold] = 'B';
+            currentIncome += calcTicketPrice(rowSold);
+            soldTickets += 1;
+            setHallOccupancy();
+            ticketPricePrint(rowSold);
+            systemState = SystemState.MENU;
+            printMenu();
+        }
+
     }
 
-    void ticketPricePrint(int rowSold) {
-        if (rows * seats <= 60) {
-            System.out.println("Ticket price: $10");
+    private int calcTicketPrice (int rowSold) {
+        if (smallCinema) {
+            return 10;
+        } else if (rowSold <= rows / 2) {
+            return 10;
         } else {
-            if (rowSold > rows / 2) {
-                System.out.println("Ticket price: $8");
-            } else {
-                System.out.println("Ticket price: $10");
-            }
+            return 8;
         }
     }
 
-    public void exit() {
+    private void ticketPricePrint(int rowSold) {
+        System.out.println("\nTicket price: $" + calcTicketPrice(rowSold));
+    }
+
+    private void setHallOccupancy () {
+        if (soldTickets == 0) {
+        } else {
+            hallOccupancy = (soldTickets / ((double) rows * seats)) * 100.00;
+        }
+    }
+
+    private void exit() {
         powerOn = false;
     }
 }

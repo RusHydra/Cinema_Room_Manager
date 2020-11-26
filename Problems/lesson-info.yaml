@@ -2,3 +2,9 @@ content:
 - Sorting numbers
 - Inverse boolean flags
 - Application as a class
+- Fix the program
+- Fix compile-time errors
+- Avoid division by zero
+- Return empty string when argument is null
+- Avoid NPE
+- Out of bounds_

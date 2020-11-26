@@ -56,8 +56,7 @@ files:
 
             if (!output.toLowerCase().contains("enter the number of seats in each row")) {
                 return CheckResult.wrong("After entering the number of rows your program should ask for entering" +
-                    " the number of seats in each row.\n" +
-                    "Your output should contain 'Enter the number of seats in each row'.");
+                    " the number of seats in ean 'Enter the number of seats in each row'.");
             }
 
             output = program.execute("8").toLowerCase();
@@ -102,12 +101,16 @@ files:
                 return CheckResult.wrong("After showing the seats arrangement you should print the menu again!");
             }
 
+            program.stop();
+
             program = new TestedProgram(Cinema.class);
             program.start();
             program.execute("2\n2");
 
             output = program.execute("1");
             checkSeats(output, 2, 2);
+
+            program.stop();
 
             program = new TestedProgram(Cinema.class);
             program.start();
@@ -613,5 +616,9 @@ files:
     }
   learner_created: false
 feedback_link: https://hyperskill.org/projects/133/stages/713/implement
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/133/stages/713/implement">JetBrains
+    Academy</a>
+  time: Thu, 26 Nov 2020 08:35:50 UTC
 record: -1
